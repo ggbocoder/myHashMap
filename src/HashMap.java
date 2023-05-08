@@ -5,7 +5,9 @@ public class HashMap<K, V> {
     private static final int DEFAULT_CAPACITY = 16;
     private static final double LOAD_FACTOR = 0.75;
 
-    private Entry<K, V>[] table;
+    private static final int DEFAULT_ERASE_VALUE=-1;
+
+//    private Entry<K, V>[] table;
     /**
      * 两张table，一张使用，另一张rehash才用到
      */
@@ -81,7 +83,7 @@ public class HashMap<K, V> {
         int index=findIndexInNewTable(hash,key);
         if(index!=-1){
             Entry<K,V> entry=tables[idx^1][index];
-            tables[idx^1][index]=null;
+            tables[idx^1][index].setValue(null);
             newSize--;
             return entry.getValue();
         }
@@ -97,7 +99,7 @@ public class HashMap<K, V> {
         int index = findIndex(hash, key);
         if (index != -1) {
             Entry<K, V> entry = tables[idx][index];
-            table[index] = null;
+            tables[idx][index] .setValue(null);
             size--;
             return entry.getValue();
         }
@@ -170,8 +172,8 @@ public class HashMap<K, V> {
         }
         int newMask = newCapacity - 1;
         int rehashingIndex=rehashedStartIndex;
-        //每次rehash八分之一的table
-        int rehashedEndIndex=rehashedStartIndex+(tables[idx].length>>3);
+        //每次rehash一部分的table
+        int rehashedEndIndex= (int) (rehashedStartIndex+(tables[idx].length/(tables[idx].length*(1-LOAD_FACTOR))));
         for (;rehashingIndex<rehashedEndIndex;rehashingIndex++) {
             Entry<K, V> entry = tables[idx][rehashingIndex];
             if (entry != null) {
@@ -192,6 +194,7 @@ public class HashMap<K, V> {
             tables[idx^1]=null;
             size=newSize;
             newSize=0;
+            rehashedStartIndex=0;
         }
 
     }
